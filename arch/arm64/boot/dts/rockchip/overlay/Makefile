@@ -29,10 +29,24 @@ dtbo-$(CONFIG_ARCH_ROCKCHIP) += \
 	rk3588-ov13855-c2.dtbo \
 	rk3588-ov13855-c3.dtbo \
 	rk3588-ssd-sata.dtbo \
-	rk3588-dmc.dtbo
+	rk3588-dmc.dtbo \
+	rk356x-edp.dtbo \
+	rk356x-i2c2-m1.dtbo \
+	rk356x-i2c3-m0.dtbo \
+	rk356x-i2c4-m0.dtbo \
+	rk356x-raspi-7inch-touchscreen.dtbo \
+	rk356x-spi3-m0-cs0-spidev.dtbo \
+	rk356x-uart3-m0.dtbo \
+	rk356x-uart7-m2.dtbo \
+	rk356x-uart9-m2.dtbo \
+	rk356x-pwm11-m1.dtbo \
+	rk356x-pwm7.dtbo \
+	rk356x-ov5647-c1.dtbo \
+	rk356x-ov5647-c2.dtbo
 
 scr-$(CONFIG_ARCH_ROCKCHIP) += \
-	rk3588-fixup.scr
+	rk3588-fixup.scr \
+	rk356x-fixup.scr
 
 dtbotxt-$(CONFIG_ARCH_ROCKCHIP) += \
 	README.rockchip-overlays

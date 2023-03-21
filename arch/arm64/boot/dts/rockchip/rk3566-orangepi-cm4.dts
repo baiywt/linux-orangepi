@@ -14,8 +14,6 @@
 #include <dt-bindings/display/rockchip_vop.h>
 #include "rk3566.dtsi"
 #include "rk3568-linux.dtsi"
-#include "rk3566-orangepi-cm4-edp.dtsi"
-#include "rk3566-orangepi-cm4-dsi.dtsi"
 
 / {
 	model = "Rockchip RK3566 Orange Pi CM4 Board";
@@ -61,10 +59,6 @@
 		regulator-name = "vcc3v3_pcie";
 		regulator-always-on;
 		regulator-boot-on;
-		enable-active-high;
-		gpio = <&gpio0 RK_PA5 GPIO_ACTIVE_HIGH>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&pcie_drv>;
 		regulator-min-microvolt = <3300000>;
 		regulator-max-microvolt = <3300000>;
 		vin-supply = <&vcc12v_dcin>;
@@ -204,9 +198,6 @@
 
 	vcc_sd: vcc-sd {
 		compatible = "regulator-fixed";
-		gpio = <&gpio0 RK_PB0 GPIO_ACTIVE_LOW>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&sdmmc0_pwr_h>;
 		regulator-max-microvolt = <3300000>;
 		regulator-min-microvolt = <3300000>;
 		regulator-name = "vcc_sd";
@@ -554,39 +545,6 @@
 	pinctrl-0 = <&uart1m0_xfer &uart1m0_ctsn>;
 };
 
-&i2c1 {
-	status = "okay";
-};
-
-&i2c2 {
-	status = "okay";
-
-	pinctrl-names = "default";
-	pinctrl-0 = <&i2c2m1_xfer>;
-};
-
-&i2c3 {
-	status = "okay";
-
-	pinctrl-names = "default";
-	pinctrl-0 = <&i2c3m0_xfer>;
-};
-
-&spi3 {
-	status = "okay";
-
-	spidev0: spidev@0 {
-		compatible = "rohm,dh2228fv";
-		reg = <0>;
-		spi-max-frequency = <10000000>;
-		status = "okay";
-	};
-};
-
-&i2c5 {
-	status = "okay";
-};
-
 &i2s0_8ch {
 	status = "okay";
 };
@@ -699,13 +657,6 @@
 		};
 	};
 
-	pcie {
-		pcie_drv: pcie-drv {
-			rockchip,pins =
-			<0 RK_PA5 RK_FUNC_GPIO &pcfg_pull_none>;
-		};
-	};
-
 	headphone {
 		hp_det: hp-det {
 			rockchip,pins = <0 RK_PC4 RK_FUNC_GPIO &pcfg_pull_down>;
@@ -741,15 +692,6 @@
         vccio5-supply = <&vcc_3v3>;
         vccio6-supply = <&vcc_3v3>;
         vccio7-supply = <&vcc_3v3>;
-};
-
-
-&pwm4 {
-	status = "okay";
-};
-
-&pwm5 {
-	status = "disabled";
 };
 
 &rk_rga {
@@ -985,229 +927,6 @@
 	status = "okay";
 };
 
-&i2c1 {
-        status = "okay";
-
-        ov5647: ov5647@36 {
-                status = "okay";
-                compatible = "ovti,ov5647";
-                reg = <0x36>;
-		clocks = <&ext_cam_ov5647_clk>;
-                clock-names = "ext_cam_ov5647_clk";
-                pwdn-gpios = <&gpio3 RK_PD3 GPIO_ACTIVE_LOW>;
-		rockchip,camera-module-index = <0>;
-		rockchip,camera-module-facing = "back";
-		rockchip,camera-module-name = "TongJu";
-		rockchip,camera-module-lens-name = "CHT842-MD";
-                port {
-                        ov5647_out: endpoint {
-                                remote-endpoint = <&dphy1_in>;
-                                data-lanes = <1 2>;
-                        };
-                };
-        };
-};
-
-&i2c3 {
-	ov5647_1: ov5647@36 {
-		status = "okay";
-		compatible = "ovti,ov5647";
-		reg = <0x36>;
-
-		clocks = <&ext_cam_ov5647_clk>;
-		clock-names = "ext_cam_ov5647_clk";
-                pwdn-gpios = <&gpio3 RK_PD3 GPIO_ACTIVE_LOW>;
-		rockchip,camera-module-index = <1>;
-		rockchip,camera-module-facing = "back";
-		rockchip,camera-module-name = "TongJu";
-		rockchip,camera-module-lens-name = "CHT842-MD";
-
-		port {
-			ov5647_out1: endpoint {
-				remote-endpoint = <&dphy2_in>;
-				data-lanes = <1 2>;
-			};
-		};
-	};
-};
-
-&csi2_dphy0 {
-         status = "disabled";
-};
-
-&csi2_dphy1 {
-        status = "okay";
-        /*
-        * dphy1 only used for split mode,
-        * can be used  concurrently  with dphy2
-        * full mode and split mode are mutually exclusive
-        */
-        ports {
-                #address-cells = <1>;
-                #size-cells = <0>;
-
-                port@0 {
-                        reg = <0>;
-                        #address-cells = <1>;
-                        #size-cells = <0>;
-
-                        dphy1_in: endpoint@1 {
-                                        reg = <1>;
-                                        remote-endpoint = <&ov5647_out>;
-                                        data-lanes = <1 2>;
-                        };
-                };
-
-                port@1 {
-                        reg = <1>;
-                        #address-cells = <1>;
-                        #size-cells = <0>;
-
-                        dphy1_out: endpoint@1 {
-                                        reg = <1>;
-                                        remote-endpoint = <&isp0_in>;
-                        };
-                };
-        };
-};
-
-&csi2_dphy2 {
-        status = "okay";
-        /*
-        * dphy2 only used for split mode,
-        * can be used  concurrently  with dphy1
-        * full mode and split mode are mutually exclusive
-        */
-        ports {
-                #address-cells = <1>;
-                #size-cells = <0>;
-
-                port@0 {
-                        reg = <0>;
-                        #address-cells = <1>;
-                        #size-cells = <0>;
-
-                        dphy2_in: endpoint@1 {
-                                        reg = <1>;
-                                        remote-endpoint = <&ov5647_out1>;
-                                        data-lanes = <1 2>;
-                        };
-                };
-
-                port@1 {
-                        reg = <1>;
-                        #address-cells = <1>;
-                        #size-cells = <0>;
-
-                        dphy2_out: endpoint@1 {
-                                        reg = <1>;
-                                        remote-endpoint = <&mipi_csi2_input>;
-                        };
-                };
-        };
-};
-
-&csi2_dphy_hw {
-      status = "okay";
-};
-
-&mipi_csi2 {
-        status = "okay";
-
-        ports {
-                #address-cells = <1>;
-                #size-cells = <0>;
-
-                port@0 {
-                        reg = <0>;
-                        #address-cells = <1>;
-                        #size-cells = <0>;
-
-                        mipi_csi2_input: endpoint@1 {
-                                        reg = <1>;
-                                        remote-endpoint = <&dphy2_out>;
-                                        data-lanes = <1 2>;
-                        };
-                };
-
-                port@1 {
-                        reg = <1>;
-                        #address-cells = <1>;
-                        #size-cells = <0>;
-
-                        mipi_csi2_output: endpoint@0 {
-                                        reg = <0>;
-                                        remote-endpoint = <&cif_mipi_in>;
-                                        data-lanes = <1 2>;
-                        };
-                };
-        };
-};
-
-&rkcif_mipi_lvds {
-        status = "okay";
-        port {
-                cif_mipi_in: endpoint {
-                        remote-endpoint = <&mipi_csi2_output>;
-                        data-lanes = <1 2>;
-                };
-        };
-};
-
-&rkcif_mipi_lvds_sditf {
-        status = "okay";
-        port {
-                mipi_lvds_sditf: endpoint {
-                        remote-endpoint = <&isp1_in>;
-                        data-lanes = <1 2>;
-                };
-        };
-};
-
-&rkisp {
-        status = "okay";
-};
-
-&rkisp_mmu {
-        status = "okay";
-};
-
-&rkisp_vir0 {
-        status = "okay";
-        port {
-                #address-cells = <1>;
-                #size-cells = <0>;
-
-                isp0_in: endpoint@0 {
-                        reg = <0>;
-                        remote-endpoint = <&dphy1_out>;
-                };
-        };
-};
-
-&rkisp_vir1 {
-        status = "okay";
-
-        port {
-                reg = <0>;
-                #address-cells = <1>;
-                #size-cells = <0>;
-
-                isp1_in: endpoint@0 {
-                        reg = <0>;
-                        remote-endpoint = <&mipi_lvds_sditf>;
-                };
-        };
-};
-
-&rkcif_mmu {
-    status = "okay";
-};
-
-&rkcif {
-    status = "okay";
-};
-
 &vp0 {
 	rockchip,plane-mask = <(1 << ROCKCHIP_VOP2_CLUSTER0 | 1 << ROCKCHIP_VOP2_ESMART0 | 1 <<
 	ROCKCHIP_VOP2_SMART0 | 1 << ROCKCHIP_VOP2_CLUSTER1 | 1 << ROCKCHIP_VOP2_ESMART1 | 1 <<
@@ -1215,18 +934,3 @@
 	rockchip,primary-plane = <ROCKCHIP_VOP2_SMART0>;
 	cursor-win-id = <ROCKCHIP_VOP2_CLUSTER0>;
 };
-
-//&vp0 {
-//	rockchip,plane-mask = <(1 << ROCKCHIP_VOP2_CLUSTER1 | 1 <<
-//	ROCKCHIP_VOP2_SMART1)>;
-//	rockchip,primary-plane = <ROCKCHIP_VOP2_SMART1>;
-//};
-//&vp1 {
-//	rockchip,plane-mask = <(1 << ROCKCHIP_VOP2_CLUSTER0 | 1 <<
-//	ROCKCHIP_VOP2_ESMART0 | 1 << ROCKCHIP_VOP2_SMART0)>;
-//	rockchip,primary-plane = <ROCKCHIP_VOP2_SMART0>;
-//};
-//&vp2 {
-//	rockchip,plane-mask = <(1 << ROCKCHIP_VOP2_ESMART1)>;
-//	rockchip,primary-plane = <ROCKCHIP_VOP2_ESMART1>;
-//};
