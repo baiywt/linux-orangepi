@@ -296,7 +296,6 @@ struct dw_mipi_dsi_rockchip {
 	int devcnt;
 	struct rockchip_drm_sub_dev sub_dev;
 	struct drm_panel *panel;
-	struct drm_bridge *bridge;
 };
 
 struct dphy_pll_parameter_map {
@@ -975,13 +974,6 @@ static int dw_mipi_dsi_rockchip_bind(struct device *dev,
 	struct device *second;
 	int ret;
 
-	ret = drm_of_find_panel_or_bridge(dsi->dev->of_node, 1, 0,
-					  &dsi->panel, &dsi->bridge);
-	if (ret) {
-		dev_err(dsi->dev, "failed to find panel or bridge: %d\n", ret);
-		return ret;
-	}
-
 	second = dw_mipi_dsi_rockchip_find_second(dsi);
 	if (IS_ERR(second))
 		return PTR_ERR(second);
@@ -1020,8 +1012,12 @@ static int dw_mipi_dsi_rockchip_bind(struct device *dev,
 		return ret;
 	}
 
-	if (dsi->panel)
-		dw_mipi_dsi_get_dsc_info_from_sink(dsi, dsi->panel, NULL);
+	ret = drm_of_find_panel_or_bridge(dsi->dev->of_node, 1, 0,
+					  &dsi->panel, NULL);
+	if (ret)
+		dev_err(dsi->dev, "failed to find panel\n");
+
+	dw_mipi_dsi_get_dsc_info_from_sink(dsi, dsi->panel, NULL);
 
 	dsi->sub_dev.connector = dw_mipi_dsi_get_connector(dsi->dmd);
 	if (dsi->sub_dev.connector) {
@@ -1055,8 +1051,10 @@ static const struct component_ops dw_mipi_dsi_rockchip_ops = {
 	.unbind	= dw_mipi_dsi_rockchip_unbind,
 };
 
-static int dw_mipi_dsi_rockchip_component_add(struct dw_mipi_dsi_rockchip *dsi)
+static int dw_mipi_dsi_rockchip_host_attach(void *priv_data,
+					    struct mipi_dsi_device *device)
 {
+	struct dw_mipi_dsi_rockchip *dsi = priv_data;
 	struct device *second;
 	int ret;
 
@@ -1083,8 +1081,10 @@ static int dw_mipi_dsi_rockchip_component_add(struct dw_mipi_dsi_rockchip *dsi)
 	return 0;
 }
 
-static int dw_mipi_dsi_rockchip_component_del(struct dw_mipi_dsi_rockchip *dsi)
+static int dw_mipi_dsi_rockchip_host_detach(void *priv_data,
+					    struct mipi_dsi_device *device)
 {
+	struct dw_mipi_dsi_rockchip *dsi = priv_data;
 	struct device *second;
 
 	second = dw_mipi_dsi_rockchip_find_second(dsi);
@@ -1095,6 +1095,11 @@ static int dw_mipi_dsi_rockchip_component_del(struct dw_mipi_dsi_rockchip *dsi)
 
 	return 0;
 }
+
+static const struct dw_mipi_dsi_host_ops dw_mipi_dsi_rockchip_host_ops = {
+	.attach = dw_mipi_dsi_rockchip_host_attach,
+	.detach = dw_mipi_dsi_rockchip_host_detach,
+};
 
 static int dw_mipi_dsi_rockchip_probe(struct platform_device *pdev)
 {
@@ -1203,6 +1208,7 @@ static int dw_mipi_dsi_rockchip_probe(struct platform_device *pdev)
 	dsi->pdata.base = dsi->base;
 	dsi->pdata.max_data_lanes = dsi->cdata->max_data_lanes;
 	dsi->pdata.phy_ops = &dw_mipi_dsi_rockchip_phy_ops;
+	dsi->pdata.host_ops = &dw_mipi_dsi_rockchip_host_ops;
 	dsi->pdata.priv_data = dsi;
 	platform_set_drvdata(pdev, dsi);
 
@@ -1212,12 +1218,6 @@ static int dw_mipi_dsi_rockchip_probe(struct platform_device *pdev)
 		if (ret != -EPROBE_DEFER)
 			DRM_DEV_ERROR(dev,
 				      "Failed to probe dw_mipi_dsi: %d\n", ret);
-		goto err_clkdisable;
-	}
-
-	ret = dw_mipi_dsi_rockchip_component_add(dsi);
-	if (ret < 0) {
-		dw_mipi_dsi_remove(dsi->dmd);
 		goto err_clkdisable;
 	}
 
@@ -1232,8 +1232,9 @@ static int dw_mipi_dsi_rockchip_remove(struct platform_device *pdev)
 {
 	struct dw_mipi_dsi_rockchip *dsi = platform_get_drvdata(pdev);
 
+	if (dsi->devcnt == 0)
+		component_del(dsi->dev, &dw_mipi_dsi_rockchip_ops);
 
-	dw_mipi_dsi_rockchip_component_del(dsi);
 	dw_mipi_dsi_remove(dsi->dmd);
 
 	return 0;
