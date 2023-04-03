@@ -208,7 +208,7 @@
 &bus_npu {
 	bus-supply = <&vdd_logic>;
 	pvtm-supply = <&vdd_cpu>;
-	status = "disabled";
+	status = "okay";
 };
 
 &cpu0 {
@@ -717,11 +717,11 @@
 
 &rknpu {
 	rknpu-supply = <&vdd_npu>;
-	status = "disabled";
+	status = "okay";
 };
 
 &rknpu_mmu {
-	status = "disabled";
+	status = "okay";
 };
 
 &route_hdmi {
@@ -763,9 +763,9 @@
 	status = "okay";
 
 	flash@0 {
-		compatible = "spi-nand";
+		compatible = "jedec,spi-nor";
 		reg = <0>;
-		spi-max-frequency = <75000000>;
+		spi-max-frequency = <100000000>;
 		spi-rx-bus-width = <4>;
 		spi-tx-bus-width = <1>;
 	};

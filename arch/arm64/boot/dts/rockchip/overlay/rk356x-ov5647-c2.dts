@@ -9,6 +9,7 @@
 		target = <&i2c3>;
 
 		__overlay__ {
+			status = "okay";
         		ov5647_1: ov5647@36 {
         		        status = "okay";
         		        compatible = "ovti,ov5647";
@@ -66,7 +67,7 @@
 
         		                dphy2_out: endpoint@1 {
         		                                reg = <1>;
-        		                                remote-endpoint = <&mipi_csi2_input>;
+        		                                remote-endpoint = <&isp0_in>;
         		                };
         		        };
         		};
@@ -82,70 +83,6 @@
 	};
 
 	fragment@5 {
-		target = <&mipi_csi2>;
-
-		__overlay__ {
-			status = "okay";
-        		ports {
-        		        #address-cells = <1>;
-        		        #size-cells = <0>;
-
-        		        port@0 {
-        		                reg = <0>;
-        		                #address-cells = <1>;
-        		                #size-cells = <0>;
-
-        		                mipi_csi2_input: endpoint@1 {
-        		                                reg = <1>;
-        		                                remote-endpoint = <&dphy2_out>;
-        		                                data-lanes = <1 2>;
-        		                };
-        		        };
-
-        		        port@1 {
-        		                reg = <1>;
-        		                #address-cells = <1>;
-        		                #size-cells = <0>;
-
-        		                mipi_csi2_output: endpoint@0 {
-        		                                reg = <0>;
-        		                                remote-endpoint = <&cif_mipi_in>;
-        		                                data-lanes = <1 2>;
-        		                };
-        		        };
-        		};
-		};
-	};
-
-	fragment@6 {
-		target = <&rkcif_mipi_lvds>;
-
-		__overlay__ {
-			status = "okay";
-        		port {
-        		        cif_mipi_in: endpoint {
-        		                remote-endpoint = <&mipi_csi2_output>;
-        		                data-lanes = <1 2>;
-        		        };
-        		};
-		};
-	};
-
-	fragment@7 {
-		target = <&rkcif_mipi_lvds_sditf>;
-
-		__overlay__ {
-			status = "okay";
-        		port {
-        		        mipi_lvds_sditf: endpoint {
-        		                remote-endpoint = <&isp1_in>;
-        		                data-lanes = <1 2>;
-        		        };
-        		};
-		};
-	};
-
-	fragment@8 {
 		target = <&rkisp>;
 
 		__overlay__ {
@@ -153,44 +90,27 @@
 		};
 	};
 
-	fragment@9 {
+	fragment@6 {
 		target = <&rkisp_mmu>;
 		__overlay__ {
 			status = "okay";
 		};
 	};
 
-	fragment@10 {
-		target = <&rkisp_vir1>;
-
+	fragment@7 {
+		target = <&rkisp_vir0>;
 		__overlay__ {
         		status = "okay";
         		port {
-        		        reg = <0>;
         		        #address-cells = <1>;
         		        #size-cells = <0>;
 
-        		        isp1_in: endpoint@0 {
+        		        isp0_in: endpoint@0 {
         		                reg = <0>;
-        		                remote-endpoint = <&mipi_lvds_sditf>;
+        		                remote-endpoint = <&dphy2_out>;
         		        };
         		};
 		};
 	};
 
-	fragment@11 {
-		target = <&rkcif>;
-
-		__overlay__ {
-			status = "okay";
-		};
-	};
-
-	fragment@12 {
-		target = <&rkcif_mmu>;
-
-		__overlay__ {
-			status = "okay";
-		};
-	};
 };
