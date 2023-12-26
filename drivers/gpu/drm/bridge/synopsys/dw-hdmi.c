@@ -1651,7 +1651,7 @@ void dw_hdmi_phy_i2c_write(struct dw_hdmi *hdmi, unsigned short data,
 		    HDMI_PHY_I2CM_DATAO_0_ADDR);
 	hdmi_writeb(hdmi, HDMI_PHY_I2CM_OPERATION_ADDR_WRITE,
 		    HDMI_PHY_I2CM_OPERATION_ADDR);
-	hdmi_phy_wait_i2c_done(hdmi, 1000);
+	hdmi_phy_wait_i2c_done(hdmi, 50);
 }
 EXPORT_SYMBOL_GPL(dw_hdmi_phy_i2c_write);
 
@@ -1693,7 +1693,7 @@ static int hdmi_phy_i2c_read(struct dw_hdmi *hdmi, unsigned char addr)
 	hdmi_writeb(hdmi, 0, HDMI_PHY_I2CM_DATAI_0_ADDR);
 	hdmi_writeb(hdmi, HDMI_PHY_I2CM_OPERATION_ADDR_READ,
 		    HDMI_PHY_I2CM_OPERATION_ADDR);
-	hdmi_phy_wait_i2c_done(hdmi, 1000);
+	hdmi_phy_wait_i2c_done(hdmi, 50);
 	val = hdmi_readb(hdmi, HDMI_PHY_I2CM_DATAI_1_ADDR);
 	val = (val & 0xff) << 8;
 	val += hdmi_readb(hdmi, HDMI_PHY_I2CM_DATAI_0_ADDR) & 0xff;
